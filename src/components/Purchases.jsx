@@ -4,7 +4,9 @@ import { query, collection, onSnapshot } from "firebase/firestore";
 import db from "../firebase";
 import PurchaseByCustomer from "./PurchaseByCustomer";
 
+// Main component to display all purchases, allows filtering by customer, product, and date
 export default function Purchases() {
+  // State variables to hold customer, product, and purchase data
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
   const [purchases, setPurchases] = useState([]);
@@ -12,10 +14,12 @@ export default function Purchases() {
   const [customerSelect, setCustomerSelect] = useState("all");
   const [purchaseDate, setPurchaseDate] = useState("");
 
+  // Fetch all customers, products, and purchases when the component mounts
   useEffect(() => {
     getAll();
   }, []);
 
+  // Function to fetch all customers, products, and purchases
   const getAll = () => {
     const docRefCustomers = query(collection(db, "customers"));
     onSnapshot(docRefCustomers, (querySnapshot) => {
@@ -31,16 +35,20 @@ export default function Purchases() {
     });
   };
 
+  // Function to handle the search button click
   const onSearch = (e) => {
     e.preventDefault();
     console.log(productSelect, customerSelect, purchaseDate);
   };
 
+  // Render the JSX
   return (
     <div className="container">
       <div className="row">
         <div className="col-8 border border-primary rounded">
+          {/* Search form */}
           <form className="m-3" onSubmit={onSearch}>
+            {/* Product selection */}
             <div className="mb-3">
               <select className="form-select" id="productSelect" onChange={(e) => setProductSelect(e.target.value)}>
                 <option key={0} defaultValue value={"all"}>Select a product</option>
@@ -49,6 +57,7 @@ export default function Purchases() {
                 ))}
               </select>
             </div>
+            {/* Customer selection */}
             <div className="mb-3">
               <select className="form-select" id="customerSelect" onChange={(e) => setCustomerSelect(e.target.value)}>
                 <option key={0} defaultValue value={"all"}>Select a customer</option>
@@ -57,6 +66,7 @@ export default function Purchases() {
                 ))}
               </select>
             </div>
+            {/* Date selection */}
             <div className="mb-3">
               <label className="form-label">Purchase Date</label>
               <input type="date" className="form-control" id="purchaseDate" onChange={(e) => setPurchaseDate(new Date(e.target.value))} />
@@ -65,6 +75,7 @@ export default function Purchases() {
           </form>
         </div>
         <div className="col-10 border border-primary rounded">
+          {/* Table to display purchases */}
           <table className="table">
             <thead>
               <tr>
@@ -77,6 +88,7 @@ export default function Purchases() {
                 <tr key={customer.id}>
                   <td>{customer.firstName} {customer.lastName}</td>
                   <td><PurchaseByCustomer id={customer.id} product={productSelect} purchaseDate={purchaseDate}/></td>
+                  {/* Additional actions can be added here */}
                   <td>
                     <button className="btn btn-primary" onClick={() => handleAddClick(customer.id)}>Buy Product</button>
                   </td>

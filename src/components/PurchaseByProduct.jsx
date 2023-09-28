@@ -1,3 +1,4 @@
+// Importing necessary modules and components from React, React Router, and Firebase
 import React, { useState, useEffect } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import {
@@ -10,17 +11,19 @@ import {
 } from "firebase/firestore";
 import db from "../firebase";
 
+// Main function component for displaying purchases by a specific product
 export default function PurchaseByProduct(props) {
-    const [purchases, setPurchases] = useState([]);
-    const [customerNames, setCustomerNames] = useState({});  // Store customer names by their IDs
-    const navigate = useNavigate();
+    const [purchases, setPurchases] = useState([]); // State variable to store purchases
+    const [customerNames, setCustomerNames] = useState({});  // State variable to store customer names indexed by their IDs
+    const navigate = useNavigate(); // Navigation hook
 
+    // Fetch purchases for a specific product when the component mounts
     useEffect(() => {
         getPurchasesByProductId();
     }, []);
 
+    // Fetch customer names whenever the purchases are updated
     useEffect(() => {
-        // Fetch customer names when purchases are updated
         purchases.forEach(async purchase => {
             const name = await getCustomerName(purchase.CustomerID);
             setCustomerNames(prevNames => ({
@@ -30,13 +33,14 @@ export default function PurchaseByProduct(props) {
         });
     }, [purchases]);
 
-
+    // Async function to get purchases by a specific product ID
     async function getPurchasesByProductId() {
         const docRef = query(collection(db, "purchases"), where("ProductID", "==", props.id));
         const docSnap = await getDocs(docRef);
         setPurchases(docSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     }
 
+    // Async function to get the customer name based on the CustomerID
     async function getCustomerName(customerId) {
         const docRef = doc(db, "customers", customerId);
         const docSnap = await getDoc(docRef);
@@ -45,19 +49,19 @@ export default function PurchaseByProduct(props) {
             return (docSnap.data().firstName + " " + docSnap.data().lastName);
         } else {
             console.error("No such customer!");
-            return "Unknown"; // Return a default value if customer not found
+            return "Unknown"; // Return a default value if the customer is not found
         }
     }
 
+    // Function to handle the add click, it navigates to the add purchase page for the customer
     const handleAddClick = (customerId) => {
         navigate(`/customer/${customerId}/add`); // Navigate to the desired path
     };
-    
+
+    // JSX for rendering the list of purchases by product
     return (
         <div>
-            
-            {<ol className="list-group">
-                
+            <ol className="list-group">
                 {purchases.map(purchase => {
                     const date = new Date(purchase.Date.seconds * 1000);
                     const dateString = date.toLocaleDateString();
@@ -69,7 +73,7 @@ export default function PurchaseByProduct(props) {
                         </li>
                     );
                 })}
-            </ol>}
+            </ol>
         </div>
     );
 }
